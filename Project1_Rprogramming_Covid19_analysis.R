@@ -1,0 +1,18 @@
+rm(list=ls())
+library(Hmisc)
+data <- read.csv("C:/Users/nundl/Desktop/Data Analytics/R PROGRAMMING/R Projects/Covid 19 analysis/COVID19_line_list_data.csv")
+describe (data)
+data$death_x <- as.integer(data$death !=0)
+sum(data$death_x)/nrow(data)
+data$death_x
+dead <- subset(data, death_x==1)
+alive <- subset(data, death_x==0)
+mean(dead$age, na.rm=TRUE)
+mean(alive$age, na.rm=TRUE)
+t.test(alive$age, dead$age, alternative = 'two.sided', conf.level = 0.99)
+
+men<-subset(data, gender=='male')
+women<-subset(data, gender=='female')
+mean(men$death_x, na.rm=TRUE)
+mean(women$death_x, na.rm=TRUE)
+t.test(men$death_x, women$death_x, alternative = 'two.sided', conf.level = 0.99)

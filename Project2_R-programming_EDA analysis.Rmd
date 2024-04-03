@@ -1,0 +1,224 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code.
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*.
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+library (dplyr)
+library (ggplot2)
+data<-read.csv("C:/Users/nundl/Desktop/Data Analytics/R PROGRAMMING/R Projects/EDA Bank analysis/bank-additional-full.csv", header=TRUE, sep=";")
+head(data)
+
+data <- data %>%
+  mutate(y=ifelse(y=='no',0,1))
+data$y <-as.integer(data$y)
+sum <- sum(data$y)
+nrow<- nrow(data)
+(sum/nrow)*100
+
+
+
+conversion_age_group <- data %>%
+  group_by(age_group=cut(age, breaks=seq(20,70, by = 10))) %>%
+  summarize(TotalCount=n(), NumberConversion=sum(y)) %>%
+  mutate(conversionrate_age = NumberConversion/TotalCount*100)
+
+
+conversion_age_group$age_group <- as.character(conversion_age_group$age_group)
+conversion_age_group$age_group [6] <- '70+'
+
+ggplot(data=conversion_age_group, aes(x=age_group, y=conversionrate_age)) + geom_bar(width = 0.5, stat = 'identity', fill= 'red')+
+  labs(title = 'Converstion Rate with respect to age group')
+
+
+
+
+conversionmaritalage <- data %>%
+  group_by(age_group=cut(age, breaks=seq(20,70, by = 10)), Marital=marital) %>%
+  summarize(Count=n(), NumberConversions=sum(y)) %>%
+  mutate(TotCount=sum(Count))%>%
+  mutate(conversionratemaritalage = NumberConversions/TotCount*100)
+  conversionmaritalage$age_group <- as.character(conversionmaritalage$age_group)
+  conversionmaritalage$age_group[is.na(conversionmaritalage$age_group)] <- '70+'
+
+    
+ggplot(data=conversionmaritalage, aes(x=age_group, y=conversionratemaritalage, fill = Marital)) + geom_bar(width = 0.5, stat='identity')+
+  labs(title = 'Conversion Rate with respect to age and marital status')
+
+
+
+
+conversion_Job <- data %>%
+  group_by(Job=job)%>%
+  summarise(Totalcount=n(), Numconv=sum(y)) %>%
+  mutate(conversionrate_job = Numconv/Totalcount*100)%>%
+  arrange(desc(conversionrate_job))
+  conversion_Job$Job <- factor(conversion_Job$Job,
+          levels = conversion_Job$Job[order(-conversion_Job$conversionrate_job)])
+
+ggplot(conversion_Job, aes(x=Job, y=conversionrate_job)) +
+  geom_bar(width=0.5, stat = "identity", fill="turquoise") +
+  labs(title="Conversion Rates by Job") +
+  theme(axis.text.x = element_text(angle = 90))
+
+
+
+
+conversionsEdu <- data %>%
+  group_by(Education=education) %>%
+  summarize(TotalCount=n(), NumberConversions=sum(y)) %>%
+  mutate(ConversionRate_Edu=NumberConversions/TotalCount*100) %>%
+  arrange(desc(ConversionRate_Edu))
+
+
+conversionsEdu$Education <- factor(conversionsEdu$Education, 
+levels = conversionsEdu$Education[order(-conversionsEdu$ConversionRate_Edu)])
+
+
+ggplot(conversionsEdu, aes(x=Education, y=ConversionRate_Edu)) +
+  geom_bar(width=0.5, stat = "identity", fill="purple") +
+  labs(title="Conversion Rates by Education") +
+  theme(axis.text.x = element_text(angle = 90))
+
+
+
+
+conversionsCredit <- data %>%
+  group_by(HasCredit=default) %>%
+  summarize(TotalCount=n(), NumberConversions=sum(y)) %>%
+  mutate(ConversionRate_credit=NumberConversions/TotalCount*100) %>%
+  arrange(desc(ConversionRate_credit))
+
+ggplot(conversionsCredit, aes(x=HasCredit, y=ConversionRate_credit, fill=HasCredit)) +
+  geom_bar(width=0.5, stat = "identity", fill='yellow') +
+  labs(title="Conversion Rates by Default Credit")
+
+
+
+conversionsHousing <- data %>%
+  group_by(HousingLoan=housing) %>%
+  summarize(TotalCount=n(), NumberConversions=sum(y)) %>%
+  mutate(ConversionRate_housing=NumberConversions/TotalCount*100) %>%
+  arrange(desc(ConversionRate_housing))
+
+ggplot(conversionsHousing, aes(x=HousingLoan, y=ConversionRate_housing, fill=HousingLoan)) +
+  geom_bar(width=0.25, stat = "identity", fill='green') +
+  labs(title="Conversion Rates by Housing Loan")
+
+
+
+
+
+conversionsLoan <- data %>%
+  group_by(Loan=loan) %>%
+  summarize(TotalCount=n(), NumberConversions=sum(y)) %>%
+  mutate(ConversionRate_loan=NumberConversions/TotalCount*100) %>%
+  arrange(desc(ConversionRate_loan))
+
+ggplot(conversionsLoan, aes(x=Loan, y=ConversionRate_loan, fill=Loan)) +
+  geom_bar(width=0.3, stat = "identity", fill='palegreen') +
+  labs(title="Conversion Rates by Personal Loan")
+
+
+conversionsContact <- data %>%
+  group_by(Contact=contact) %>%
+  summarize(TotalCount=n(), NumberConversions=sum(y)) %>%
+  mutate(ConversionRate_contact=NumberConversions/TotalCount*100) %>%
+  arrange(desc(ConversionRate_contact))
+
+head(conversionsContact)
+ggplot(conversionsContact, aes(x=Contact, y=ConversionRate_contact, fill=Contact)) +
+  geom_bar(width=0.3, stat = "identity", fill='black') +
+  labs(title="Conversion Rates by contact")
+
+
+
+
+
+conversionsMonth <- data %>%
+  group_by(Month=month) %>%
+  summarize(TotalCount=n(), NumberConversions=sum(y)) %>%
+  mutate(ConversionRate_month=NumberConversions/TotalCount*100) %>%
+  arrange(desc(ConversionRate_month))
+
+
+conversionsMonth$Month <- factor(conversionsMonth$Month, 
+                                   levels = conversionsMonth$Month[order(-conversionsMonth$ConversionRate_month)])
+
+ggplot(conversionsMonth, aes(x=Month, y=ConversionRate_month)) +
+  geom_bar(width=0.5, stat = "identity", fill="brown") +
+  labs(title="Conversion Rates by Contact Month") +
+  theme(axis.text.x = element_text(angle = 90))
+
+
+
+
+conversionsDayOfWeek <- data %>%
+  group_by(Day_Of_Week=day_of_week) %>%
+  summarize(TotalCount=n(), NumberConversions=sum(y)) %>%
+  mutate(ConversionRate_dow=NumberConversions/TotalCount*100) %>%
+  arrange(desc(ConversionRate_dow))
+
+
+conversionsDayOfWeek$Day_Of_Week <- factor(conversionsDayOfWeek$Day_Of_Week, levels = c("mon", "tue", "wed", "thu", "fri"))
+
+ggplot(conversionsDayOfWeek, aes(x=Day_Of_Week, y=ConversionRate_dow)) +
+  geom_bar(width=0.5, stat = "identity", fill="grey") +
+  labs(title="Conversion Rates by Day of Week") +
+  theme(axis.text.x = element_text(angle = 90))
+
+
+
+
+data_duration <- data %>%
+  group_by(Subscribed=y) %>%
+  summarise(Average_Duration=mean(duration))
+head(data_duration)
+
+
+conversionsCampaign <- data %>%
+  group_by(Campaign=campaign) %>%
+  summarize(TotalCount=n(), NumberConversions=sum(y)) %>%
+  mutate(ConversionRate_campaign=NumberConversions/TotalCount*100) %>%
+  arrange(desc(ConversionRate_campaign))
+
+head(conversionsCampaign)
+ggplot(conversionsCampaign, aes(x=Campaign, y=ConversionRate_campaign, fill=Campaign)) +
+  geom_bar(width=0.6, stat = "identity", fill='blue') +
+  labs(title="Conversion Rates by campaign")
+
+
+
+
+
+conversionsPOutcome <- data %>%
+  group_by(Previous_Outcome=poutcome) %>%
+  summarize(TotalCount=n(), NumberConversions=sum(y)) %>%
+  mutate(ConversionRate_po=NumberConversions/TotalCount*100) %>%
+  arrange(desc(ConversionRate_po))
+
+ggplot(conversionsPOutcome, aes(x=Previous_Outcome, y=ConversionRate_po)) +
+  geom_bar(width=0.5, stat = "identity", fill="gold") +
+  labs(title="Conversion Rates by Outcome of the Previous Campaign")
+
+
+
+
+
+
+
+```
